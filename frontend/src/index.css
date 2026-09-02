@@ -1,0 +1,121 @@
+@import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;500;700;900&family=IBM+Plex+Sans:wght@400;500;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    /* Earthy palette */
+    --bg: #fcfbf8;
+    --surface: #f7f5f0;
+    --ink: #1a3628;
+    --ink-soft: #4a5d52;
+    --terracotta: #d46a4f;
+    --terracotta-soft: #e08a72;
+    --sage: #8fa596;
+    --sage-soft: #b7c7bb;
+    --border-earth: #e5e1d8;
+    --warn: #b45309;
+}
+
+@layer base {
+    :root {
+        --background: 42 33% 98%;
+        --foreground: 148 34% 15%;
+        --card: 0 0% 100%;
+        --card-foreground: 148 34% 15%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 148 34% 15%;
+        --primary: 14 60% 57%; /* terracotta */
+        --primary-foreground: 0 0% 100%;
+        --secondary: 42 20% 94%;
+        --secondary-foreground: 148 34% 15%;
+        --muted: 42 20% 94%;
+        --muted-foreground: 148 12% 33%;
+        --accent: 130 12% 60%; /* sage */
+        --accent-foreground: 148 34% 15%;
+        --destructive: 0 72% 45%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 42 18% 87%;
+        --input: 42 18% 87%;
+        --ring: 14 60% 57%;
+        --radius: 0.75rem;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+    html,
+    body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "IBM Plex Sans", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+    }
+    h1,
+    h2,
+    h3,
+    h4 {
+        font-family: "Work Sans", system-ui, sans-serif;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+    }
+    .font-display {
+        font-family: "Work Sans", system-ui, sans-serif;
+    }
+    .label-eyebrow {
+        font-family: "IBM Plex Sans", system-ui, sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.22em;
+        font-weight: 500;
+        font-size: 0.72rem;
+        color: var(--ink-soft);
+    }
+}
+
+/* Card lift hover */
+.card-lift {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.card-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px -18px rgba(26, 54, 40, 0.25);
+    border-color: var(--terracotta);
+}
+
+/* Tag pill */
+.tag-sage {
+    background: rgba(143, 165, 150, 0.18);
+    color: #2f5442;
+    border-radius: 9999px;
+    padding: 0.15rem 0.65rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.tag-terra {
+    background: rgba(212, 106, 79, 0.14);
+    color: #8b3618;
+    border-radius: 9999px;
+    padding: 0.15rem 0.65rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+}
+
+/* Glass nav */
+.glass-nav {
+    background: rgba(252, 251, 248, 0.85);
+    backdrop-filter: saturate(150%) blur(18px);
+    -webkit-backdrop-filter: saturate(150%) blur(18px);
+    border-bottom: 1px solid rgba(229, 225, 216, 0.6);
+}
+
+button,
+a {
+    transition: transform 0.15s ease, background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}

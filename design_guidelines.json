@@ -1,0 +1,75 @@
+{
+  "project_name": "Tuitora - Dibrugarh Tuition Finder",
+  "app_type": "hybrid_fullstack",
+  "theme_strategy": "Light theme preferred to project transparency, trust, and academic focus. Dark mode toggle can be provided but default is light.",
+  "typography": {
+    "headings": {
+      "family": "Work Sans",
+      "weights": ["light", "semibold", "black"],
+      "usage_rules": "H1 max text-5xl to text-6xl, tracking-tight. Never use Inter for headings."
+    },
+    "body": {
+      "family": "IBM Plex Sans",
+      "weights": ["regular", "medium"],
+      "usage_rules": "text-base for main body, leading-relaxed."
+    },
+    "labels": {
+      "family": "IBM Plex Sans",
+      "weights": ["medium"],
+      "usage_rules": "Uppercase, tracking-[0.2em], text-xs to text-sm."
+    }
+  },
+  "colors": {
+    "archetype": "ORGANIC & EARTHY (Trust, Growth, Calm)",
+    "palette": {
+      "base_bg": "#FCFBF8",
+      "surface": "#F7F5F0",
+      "text_primary": "#1A3628",
+      "text_secondary": "#4A5D52",
+      "primary_accent": "#D46A4F",
+      "secondary_accent": "#8FA596",
+      "border_color": "#E5E1D8"
+    },
+    "rules": "No generic SaaS blue. Do not use pure black or pure white. Tint all neutrals with warm earthy tones. Hover states must be a lighter hue of the active state."
+  },
+  "layouts": {
+    "marketing_pages": "Bento Grid Protocol (MODE A). grid-cols-1 md:grid-cols-12, wide gaps (gap-8 to gap-12). Heavy asymmetry. Do not perfectly fill the grid.",
+    "dashboards": "High Density Grid (MODE B). grid-cols-1 md:grid-cols-4, tight gaps (gap-4 or gap-6). Rectangular, cardless or minimal 1px border cards. Every pixel utilized.",
+    "spacing": "Generous Spacing Philosophy. Use p-8, p-12, p-16 for containers. Prevent text collision with generous internal padding."
+  },
+  "components": {
+    "buttons": "Pill-shaped (rounded-full) or sharp rectangular. Primary uses Terracotta (#D46A4F). Include hover animations (transform, scale).",
+    "cards_tutor": "Flat solid background, 1px subtle border (border-border_color), no heavy drop shadows. Hover: slight lift (-translate-y-1) and subtle shadow. Must include data-testid.",
+    "tags": "Pill-shaped, Sage background (opacity 20%) with deep green text.",
+    "forms_inputs": "Shadcn components heavily customized to match earthy theme. No Vercel default look.",
+    "navigation": "Crystal Glassmorphism on scroll (bg-white/70, backdrop-blur-xl, saturate-150, 1px white/40 bottom border). Logo + 3-5 links + CTA.",
+    "icons": "Use @phosphor-icons/react or lucide-react."
+  },
+  "image_urls": {
+    "hero_marketing": {
+      "url": "https://images.unsplash.com/photo-1514369118554-e20d93546b30?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzB8MHwxfHNlYXJjaHwyfHxpbmRpYW4lMjBzdHVkZW50JTIwc3R1ZHlpbmd8ZW58MHx8fHwxNzg3OTc1Mzk4fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Woman writing on book. Focused studying environment.",
+      "category": "Hero Background / Feature Image"
+    },
+    "tutor_profile_1": {
+      "url": "https://images.unsplash.com/photo-1601655781320-205e34c94eb1?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1ODR8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjB0ZWFjaGVyJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzg3OTc1Mzk4fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Man in gray suit holding book/iPad. Professional tutor.",
+      "category": "Tutor Avatar/Profile"
+    },
+    "tutor_profile_2": {
+      "url": "https://images.unsplash.com/photo-1622460241950-a4cad772e07e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1ODR8MHwxfHNlYXJjaHwzfHxpbmRpYW4lMjB0ZWFjaGVyJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzg3OTc1Mzk4fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Older woman in saree. Experienced local teacher.",
+      "category": "Tutor Avatar/Profile"
+    },
+    "tutor_profile_3": {
+      "url": "https://images.unsplash.com/photo-1758336011136-343678e4fc05?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1ODR8MHwxfHNlYXJjaHwyfHxpbmRpYW4lMjB0ZWFjaGVyJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzg3OTc1Mzk4fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Man in red kurta with glasses smiling.",
+      "category": "Tutor Avatar/Profile"
+    },
+    "ambience_feature": {
+      "url": "https://images.unsplash.com/photo-1471107340929-a87cd0f5b5f3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzB8MHwxfHNlYXJjaHwyfHxub3RlYm9vayUyMHBlbiUyMGRlc2t8ZW58MHx8fHwxNzg3OTc1Mzk4fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Fountain pen on spiral notebook.",
+      "category": "Filler/How it works section background"
+    }
+  }
+}
