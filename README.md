@@ -1,13 +1,15 @@
-# Tuitora — Dibrugarh Tuition Finder
+# Tuitora — Dibrugarh Tuition Finder (Next.js + Clerk + MongoDB)
 
 Tuitora is a full-stack hyper-local platform designed to connect students and parents with qualified home tutors across Dibrugarh, Assam.
 
 ---
 
 ## 🛠 Tech Stack
-- **Backend:** FastAPI, Motor (Async MongoDB), Pydantic v2, JWT Auth, Bcrypt, Uvicorn
-- **Frontend:** React 18, Tailwind CSS, Lucide Icons, Sonner Toasts, React Router v6, TanStack React Query
-- **Database:** MongoDB
+- **Framework:** Next.js 14 (App Router)
+- **Authentication:** Clerk Authentication (`@clerk/nextjs` with instant Webhook & auto-sync)
+- **Database:** MongoDB (`mongodb` official driver with connection pooling)
+- **Styling:** Tailwind CSS, Radix UI primitives, Lucide Icons, Sonner Toasts
+- **Language:** TypeScript & JavaScript
 
 ---
 
@@ -15,88 +17,78 @@ Tuitora is a full-stack hyper-local platform designed to connect students and pa
 
 ```
 tution-app/
-├── .env                       # Root environment variables
-├── design_guidelines.json     # Brand design specifications
-├── memory/
-│   └── test_credentials.md   # Default test login accounts
-├── backend/
-│   ├── .env                   # Backend environment configuration
-│   ├── requirements.txt       # Python dependencies
-│   ├── server.py              # FastAPI server & endpoints
-│   └── seed.py                # Database seed script for tutors
-└── frontend/
-    ├── .env                   # Frontend environment configuration
-    ├── package.json           # Node dependencies
-    ├── tailwind.config.js     # Tailwind styling setup
-    ├── public/
-    │   └── index.html
-    └── src/
-        ├── index.css
-        ├── index.js
-        ├── App.js
-        ├── App.css
-        ├── lib/
-        │   ├── api.js
-        │   ├── auth.jsx
-        │   ├── constants.js
-        │   └── utils.js
-        ├── components/
-        │   ├── Navbar.jsx
-        │   ├── TutorCard.jsx
-        │   └── ui/
-        └── pages/
-            ├── Home.jsx
-            ├── TutorSearch.jsx
-            ├── TutorDetail.jsx
-            ├── Login.jsx
-            ├── Signup.jsx
-            ├── StudentDashboard.jsx
-            ├── TeacherDashboard.jsx
-            └── AdminDashboard.jsx
+├── .env                       # Root environment variables (Clerk keys, MongoDB URI)
+├── middleware.ts              # Clerk authentication route protection
+├── lib/
+│   ├── mongodb.ts            # MongoDB connection singleton
+│   ├── auth.ts               # User session & Clerk-to-MongoDB sync helper
+│   ├── constants.ts          # Dibrugarh areas, classes, subjects, modes
+│   └── utils.ts              # Styling helpers
+├── components/
+│   ├── Navbar.tsx             # Role-aware navigation with Clerk user button
+│   ├── TutorCard.tsx          # Tutor profile card
+│   └── ui/                   # Reusable UI components (Button, Card, Dialog, etc.)
+├── app/
+│   ├── layout.tsx             # Root layout with ClerkProvider & Sonner Toaster
+│   ├── globals.css            # Earthy brand palette styling
+│   ├── page.tsx               # Home landing page with live stats
+│   ├── teachers/
+│   │   ├── page.tsx           # Hyper-local tutor search & filtering
+│   │   └── [id]/page.tsx      # Tutor profile with inquiry & report modals
+│   ├── sign-in/[[...sign-in]] # Clerk Sign-In
+│   ├── sign-up/[[...sign-up]] # Clerk Sign-Up
+│   ├── dashboard/
+│   │   ├── page.tsx           # Role redirector (student / teacher / admin)
+│   │   ├── student/page.tsx   # Student inquiries, learning profile, saved tutors
+│   │   ├── teacher/page.tsx   # Teacher inbox, availability toggle, profile editor
+│   │   ├── admin/page.tsx     # Admin statistics, verification, moderation
+│   │   └── onboarding/page.tsx# New user account type selection
+│   └── api/                   # Next.js Route Handlers (REST API)
+│       ├── webhooks/clerk/    # Instant Clerk Webhook synchronization
+│       ├── teachers/          # Teacher search, details, availability
+│       ├── students/          # Student learning profile & requirements
+│       ├── requests/          # Tuition inquiries & status updates
+│       ├── saved/             # Saved/bookmarked tutors
+│       ├── reports/           # Profile issue reports
+│       └── admin/             # Verification, statistics, user blocking
+├── scripts/
+│   └── seed.mjs               # Database seeder for sample Dibrugarh tutors
+└── legacy/                    # Archived previous FastAPI & React SPA codebase
 ```
 
 ---
 
 ## 🚀 Getting Started
 
-### 1. Environment Variables Setup
-The `.env` files contain dummy values. Update them as needed:
-- Root `.env`
-- `backend/.env`
-- `frontend/.env`
+### 1. Configure Environment Variables
+Open `.env` in the root folder and configure:
+```env
+MONGODB_URI=mongodb://localhost:27017
+DB_NAME=tuitora_database
 
-### 2. Backend Setup
-```bash
-cd backend
-python -m venv venv
-# On Windows PowerShell:
-.\venv\Scripts\Activate.ps1
-# On macOS/Linux:
-source venv/bin/activate
-
-pip install -r requirements.txt
-uvicorn server:app --reload --port 8000
+# Clerk Authentication Keys (From https://dashboard.clerk.com)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+CLERK_WEBHOOK_SECRET=whsec_...
 ```
 
-### 3. Seed Sample Data (Optional)
-With backend running and MongoDB active:
+### 2. Seed Database with Dibrugarh Tutors
+Populate local MongoDB with initial verified tutors across Dibrugarh localities (Chowkidingee, Naliapool, Amolapatty, etc.):
 ```bash
-cd backend
-python seed.py
+npm run seed
 ```
 
-### 4. Frontend Setup
+### 3. Run Development Server
 ```bash
-cd frontend
-npm install
-npm start
+npm run dev
 ```
-Frontend will be available at `http://localhost:3000`.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 🔑 Default Credentials
-
-- **Admin:** `admin@dibrugarhtuition.in` / `Admin@123`
-- **Parent / Student Demo:** `parent@example.com` / `Parent@123`
-- **Tutor Demo:** `ritu.das@example.com` / `Teacher@123`
+## ⚡ Production Build
+To test or create a production build:
+```bash
+npm run build
+npm start
+```

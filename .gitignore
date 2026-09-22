@@ -41,6 +41,8 @@ backend/.env
 frontend/.env
 
 # Production Build
+.next/
+out/
 /frontend/build
 build/
 
