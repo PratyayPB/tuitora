@@ -165,7 +165,7 @@ export default function StudentDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[color:var(--bg)] py-10 px-5 lg:px-10 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[color:var(--bg)] py-10 px-4 sm:px-6 lg:px-8 max-w-screen-xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <div className="label-eyebrow">STUDENT & PARENT PORTAL</div>
@@ -179,17 +179,17 @@ export default function StudentDashboard() {
 
         <Button
           asChild
-          className="rounded-full bg-[color:var(--terracotta)] text-white hover:bg-[color:var(--terracotta-soft)]"
+          className="rounded-full bg-[color:var(--terracotta)] text-white hover:bg-[color:var(--terracotta-soft)] min-h-[44px]"
         >
           <Link href="/teachers">Find More Tutors</Link>
         </Button>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-[color:var(--border-earth)] mb-8">
+      <div className="flex items-center gap-2 border-b border-[color:var(--border-earth)] mb-8 overflow-x-auto pb-1">
         <button
           onClick={() => setActiveTab("requests")}
-          className={`pb-3 px-4 text-xs font-semibold flex items-center gap-1.5 transition-all border-b-2 ${
+          className={`pb-3 px-4 min-h-[44px] text-xs font-semibold flex items-center gap-1.5 transition-all border-b-2 whitespace-nowrap ${
             activeTab === "requests"
               ? "border-[color:var(--terracotta)] text-[color:var(--terracotta)]"
               : "border-transparent text-[color:var(--ink-soft)] hover:text-[color:var(--ink)]"
@@ -199,7 +199,7 @@ export default function StudentDashboard() {
         </button>
         <button
           onClick={() => setActiveTab("requirement")}
-          className={`pb-3 px-4 text-xs font-semibold flex items-center gap-1.5 transition-all border-b-2 ${
+          className={`pb-3 px-4 min-h-[44px] text-xs font-semibold flex items-center gap-1.5 transition-all border-b-2 whitespace-nowrap ${
             activeTab === "requirement"
               ? "border-[color:var(--terracotta)] text-[color:var(--terracotta)]"
               : "border-transparent text-[color:var(--ink-soft)] hover:text-[color:var(--ink)]"
@@ -209,7 +209,7 @@ export default function StudentDashboard() {
         </button>
         <button
           onClick={() => setActiveTab("saved")}
-          className={`pb-3 px-4 text-xs font-semibold flex items-center gap-1.5 transition-all border-b-2 ${
+          className={`pb-3 px-4 min-h-[44px] text-xs font-semibold flex items-center gap-1.5 transition-all border-b-2 whitespace-nowrap ${
             activeTab === "saved"
               ? "border-[color:var(--terracotta)] text-[color:var(--terracotta)]"
               : "border-transparent text-[color:var(--ink-soft)] hover:text-[color:var(--ink)]"
@@ -233,7 +233,7 @@ export default function StudentDashboard() {
               </p>
               <Button
                 asChild
-                className="rounded-full bg-[color:var(--terracotta)] text-white"
+                className="rounded-full bg-[color:var(--terracotta)] text-white min-h-[44px]"
               >
                 <Link href="/teachers">Browse Tutors</Link>
               </Button>
@@ -291,7 +291,7 @@ export default function StudentDashboard() {
                       {r.teacher_phone && (
                         <a
                           href={`tel:${r.teacher_phone}`}
-                          className="px-3 py-1.5 bg-green-700 text-white rounded-full font-semibold hover:bg-green-800"
+                          className="px-3 py-1.5 bg-green-700 text-white rounded-full font-semibold hover:bg-green-800 min-h-[44px] flex items-center justify-center"
                         >
                           Call Teacher
                         </a>
@@ -324,7 +324,7 @@ export default function StudentDashboard() {
             {requirement && (
               <button
                 onClick={handleDeleteRequirement}
-                className="text-xs text-red-600 hover:underline flex items-center gap-1"
+                className="text-xs text-red-600 hover:underline flex items-center gap-1 min-h-[44px]"
               >
                 <Trash2 size={13} /> Clear Profile
               </button>
@@ -332,7 +332,7 @@ export default function StudentDashboard() {
           </div>
 
           <form onSubmit={handleSaveRequirement} className="flex flex-col gap-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label className="text-xs font-semibold block mb-1">
                   Student Name *
@@ -343,7 +343,7 @@ export default function StudentDashboard() {
                   placeholder="e.g. Rahul Sharma"
                   value={reqStudentName}
                   onChange={(e) => setReqStudentName(e.target.value)}
-                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-2.5 outline-none"
+                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-3 min-h-[44px] outline-none"
                 />
               </div>
 
@@ -356,12 +356,12 @@ export default function StudentDashboard() {
                   placeholder="e.g. Salt Brook Academy / Don Bosco"
                   value={reqSchool}
                   onChange={(e) => setReqSchool(e.target.value)}
-                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-2.5 outline-none"
+                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-3 min-h-[44px] outline-none"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label className="text-xs font-semibold block mb-1">
                   Class / Standard *
@@ -369,7 +369,7 @@ export default function StudentDashboard() {
                 <select
                   value={reqClass}
                   onChange={(e) => setReqClass(e.target.value)}
-                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-2.5 outline-none"
+                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-3 min-h-[44px] outline-none bg-transparent"
                 >
                   {CLASSES.map((c) => (
                     <option key={c} value={c}>
@@ -386,7 +386,7 @@ export default function StudentDashboard() {
                 <select
                   value={reqArea}
                   onChange={(e) => setReqArea(e.target.value)}
-                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-2.5 outline-none"
+                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-3 min-h-[44px] outline-none bg-transparent"
                 >
                   {areas.map((a) => (
                     <option key={a} value={a}>
@@ -401,7 +401,7 @@ export default function StudentDashboard() {
               <label className="text-xs font-semibold block mb-2">
                 Subjects Required *
               </label>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-2">
                 {SUBJECTS.map((s) => {
                   const selected = reqSubjects.includes(s);
                   return (
@@ -409,7 +409,7 @@ export default function StudentDashboard() {
                       key={s}
                       type="button"
                       onClick={() => toggleSubject(s)}
-                      className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
+                      className={`text-xs px-4 py-2 min-h-[44px] flex items-center justify-center rounded-full border transition-all ${
                         selected
                           ? "bg-[color:var(--ink)] text-white border-[color:var(--ink)]"
                           : "border-[color:var(--border-earth)] bg-[color:var(--surface)] text-[color:var(--ink-soft)]"
@@ -434,7 +434,7 @@ export default function StudentDashboard() {
                       key={m.value}
                       type="button"
                       onClick={() => toggleMode(m.value)}
-                      className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
+                      className={`text-xs px-4 py-2 min-h-[44px] flex items-center justify-center rounded-full border transition-all ${
                         selected
                           ? "bg-[color:var(--terracotta)] text-white border-[color:var(--terracotta)]"
                           : "border-[color:var(--border-earth)] bg-[color:var(--surface)] text-[color:var(--ink-soft)]"
@@ -447,7 +447,7 @@ export default function StudentDashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div>
                 <label className="text-xs font-semibold block mb-1">
                   Budget Min (₹/mo)
@@ -456,7 +456,7 @@ export default function StudentDashboard() {
                   type="number"
                   value={reqBudgetMin}
                   onChange={(e) => setReqBudgetMin(Number(e.target.value))}
-                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-2.5 outline-none"
+                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-3 min-h-[44px] outline-none"
                 />
               </div>
               <div>
@@ -467,7 +467,7 @@ export default function StudentDashboard() {
                   type="number"
                   value={reqBudgetMax}
                   onChange={(e) => setReqBudgetMax(Number(e.target.value))}
-                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-2.5 outline-none"
+                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-3 min-h-[44px] outline-none"
                 />
               </div>
               <div>
@@ -479,7 +479,7 @@ export default function StudentDashboard() {
                   placeholder="e.g. 5pm - 8pm"
                   value={reqTime}
                   onChange={(e) => setReqTime(e.target.value)}
-                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-2.5 outline-none"
+                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-3 min-h-[44px] outline-none"
                 />
               </div>
             </div>
@@ -493,14 +493,14 @@ export default function StudentDashboard() {
                 placeholder="Mention specific board exam syllabus, weak areas, or preference..."
                 value={reqDesc}
                 onChange={(e) => setReqDesc(e.target.value)}
-                className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-2.5 outline-none"
+                className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-3 outline-none"
               />
             </div>
 
             <Button
               type="submit"
               disabled={savingReq}
-              className="rounded-full bg-[color:var(--terracotta)] hover:bg-[color:var(--terracotta-soft)] text-white self-start px-8 py-5"
+              className="rounded-full bg-[color:var(--terracotta)] hover:bg-[color:var(--terracotta-soft)] text-white self-start px-8 py-5 min-h-[44px]"
             >
               {savingReq ? "Saving..." : "Save Learning Profile"}
             </Button>
@@ -521,7 +521,7 @@ export default function StudentDashboard() {
               </p>
               <Button
                 asChild
-                className="rounded-full bg-[color:var(--terracotta)] text-white"
+                className="rounded-full bg-[color:var(--terracotta)] text-white min-h-[44px]"
               >
                 <Link href="/teachers">Browse Tutors</Link>
               </Button>

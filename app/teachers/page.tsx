@@ -114,7 +114,7 @@ function TutorSearchContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[color:var(--bg)] py-10 px-5 lg:px-10 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[color:var(--bg)] py-10 px-4 sm:px-6 lg:px-8 max-w-screen-xl mx-auto">
       <div className="mb-8">
         <div className="label-eyebrow">DIBRUGARH TUTOR DIRECTORY</div>
         <h1 className="font-display font-black text-3xl sm:text-4xl text-[color:var(--ink)] mt-1">
@@ -134,7 +134,7 @@ function TutorSearchContent() {
             </div>
             <button
               onClick={handleReset}
-              className="text-xs text-[color:var(--terracotta)] hover:underline flex items-center gap-1"
+              className="text-xs text-[color:var(--terracotta)] hover:underline flex items-center gap-1 min-h-[44px] px-2 -mr-2"
             >
               <RotateCcw size={12} /> Reset
             </button>
@@ -145,7 +145,7 @@ function TutorSearchContent() {
             <label className="text-xs font-semibold text-[color:var(--ink-soft)] uppercase tracking-wider block mb-1.5">
               Search
             </label>
-            <div className="flex items-center gap-2 border border-[color:var(--border-earth)] rounded-lg px-3 py-2">
+            <div className="flex items-center gap-2 border border-[color:var(--border-earth)] rounded-lg px-3 min-h-[44px]">
               <Search size={14} className="text-[color:var(--ink-soft)]" />
               <input
                 data-testid="filter-query"
@@ -153,7 +153,7 @@ function TutorSearchContent() {
                 placeholder="Name, keyword..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="w-full text-xs bg-transparent outline-none"
+                className="w-full text-xs bg-transparent outline-none py-2"
               />
             </div>
           </div>
@@ -167,7 +167,7 @@ function TutorSearchContent() {
               data-testid="filter-area"
               value={area}
               onChange={(e) => setArea(e.target.value)}
-              className="w-full text-xs border border-[color:var(--border-earth)] rounded-lg px-3 py-2 bg-transparent outline-none"
+              className="w-full text-xs border border-[color:var(--border-earth)] rounded-lg px-3 min-h-[44px] bg-transparent outline-none"
             >
               <option value="">All Areas</option>
               {areas.map((a) => (
@@ -187,7 +187,7 @@ function TutorSearchContent() {
               data-testid="filter-subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="w-full text-xs border border-[color:var(--border-earth)] rounded-lg px-3 py-2 bg-transparent outline-none"
+              className="w-full text-xs border border-[color:var(--border-earth)] rounded-lg px-3 min-h-[44px] bg-transparent outline-none"
             >
               <option value="">All Subjects</option>
               {SUBJECTS.map((s) => (
@@ -207,7 +207,7 @@ function TutorSearchContent() {
               data-testid="filter-class"
               value={classStd}
               onChange={(e) => setClassStd(e.target.value)}
-              className="w-full text-xs border border-[color:var(--border-earth)] rounded-lg px-3 py-2 bg-transparent outline-none"
+              className="w-full text-xs border border-[color:var(--border-earth)] rounded-lg px-3 min-h-[44px] bg-transparent outline-none"
             >
               <option value="">All Classes</option>
               {CLASSES.map((c) => (
@@ -227,7 +227,7 @@ function TutorSearchContent() {
               data-testid="filter-mode"
               value={mode}
               onChange={(e) => setMode(e.target.value)}
-              className="w-full text-xs border border-[color:var(--border-earth)] rounded-lg px-3 py-2 bg-transparent outline-none"
+              className="w-full text-xs border border-[color:var(--border-earth)] rounded-lg px-3 min-h-[44px] bg-transparent outline-none"
             >
               <option value="">Any Mode</option>
               {MODES.map((m) => (
@@ -249,7 +249,7 @@ function TutorSearchContent() {
               placeholder="e.g. 4000"
               value={maxFee}
               onChange={(e) => setMaxFee(e.target.value)}
-              className="w-full text-xs border border-[color:var(--border-earth)] rounded-lg px-3 py-2 bg-transparent outline-none"
+              className="w-full text-xs border border-[color:var(--border-earth)] rounded-lg px-3 min-h-[44px] bg-transparent outline-none py-2"
             />
           </div>
 
@@ -261,11 +261,11 @@ function TutorSearchContent() {
               data-testid="filter-verified"
               checked={verifiedOnly}
               onChange={(e) => setVerifiedOnly(e.target.checked)}
-              className="rounded accent-[color:var(--terracotta)]"
+              className="rounded accent-[color:var(--terracotta)] w-5 h-5 cursor-pointer"
             />
             <label
               htmlFor="verified-only"
-              className="text-xs font-medium cursor-pointer"
+              className="text-sm font-medium cursor-pointer min-h-[44px] flex items-center flex-1"
             >
               Verified Tutors Only
             </label>
@@ -290,7 +290,7 @@ function TutorSearchContent() {
               <Button
                 onClick={handleReset}
                 variant="outline"
-                className="rounded-full"
+                className="rounded-full min-h-[44px]"
               >
                 Clear Filters
               </Button>

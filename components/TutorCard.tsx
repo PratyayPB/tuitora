@@ -73,7 +73,7 @@ export default function TutorCard({ t, onSave, saved }: TutorCardProps) {
           <button
             data-testid={`tutor-save-${t.id}`}
             onClick={() => onSave(t)}
-            className={`text-xs px-2.5 py-1 rounded-full border transition-all ${
+            className={`text-xs px-3 py-1.5 min-h-[44px] min-w-[44px] md:min-h-[32px] md:min-w-0 flex items-center justify-center rounded-full border transition-all ${
               saved
                 ? "bg-[color:var(--terracotta)] text-white border-[color:var(--terracotta)]"
                 : "border-[color:var(--border-earth)] hover:border-[color:var(--terracotta)]"
@@ -122,7 +122,7 @@ export default function TutorCard({ t, onSave, saved }: TutorCardProps) {
         <Link
           href={`/teachers/${t.id}`}
           data-testid={`tutor-view-${t.id}`}
-          className="text-xs px-3.5 py-1.5 rounded-full bg-[color:var(--ink)] text-white hover:bg-[color:var(--terracotta)] transition-colors"
+          className="text-xs px-4 py-2 min-h-[44px] md:min-h-[32px] flex items-center justify-center rounded-full bg-[color:var(--ink)] text-white hover:bg-[color:var(--terracotta)] transition-colors"
         >
           View Profile
         </Link>
