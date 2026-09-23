@@ -1,393 +1,119 @@
-"use client";
-
-import React, { useState, useEffect, useCallback } from "react";
+import React from "react";
 import Link from "next/link";
-import { useUser } from "@clerk/nextjs";
+import { getDb } from "@/lib/mongodb";
+import { DIBRUGARH_AREAS } from "@/lib/constants";
 import TutorCard, { TeacherProfile } from "@/components/TutorCard";
-import { CLASSES, SUBJECTS, MODES } from "@/lib/constants";
-import { Button } from "@/components/ui/button";
 import {
-  Clock,
+  Search,
+  MapPin,
+  ShieldCheck,
+  Users,
+  ArrowRight,
   CheckCircle2,
-  XCircle,
-  Phone,
-  Heart,
-  FileText,
-  Send,
-  Trash2,
 } from "lucide-react";
-import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
-export default function StudentDashboard() {
-  const { user, isLoaded } = useUser();
+async function getHomeData() {
+  try {
+    const db = await getDb();
+    const [verifiedTutors, totalTutors, students, requests, rawFeatured] =
+      await Promise.all([
+        db.collection("teacher_profiles").countDocuments({ is_verified: true }),
+        db.collection("teacher_profiles").countDocuments({}),
+        db.collection("users").countDocuments({ role: "student" }),
+        db.collection("tuition_requests").countDocuments({}),
+        db
+          .collection("teacher_profiles")
+          .find({}, { projection: { _id: 0, phone: 0, email: 0 } })
+          .limit(6)
+          .toArray(),
+      ]);
 
-  const [activeTab, setActiveTab] = useState<"requests" | "requirement" | "saved">("requests");
-  const [requests, setRequests] = useState<any[]>([]);
-  const [savedTutors, setSavedTutors] = useState<TeacherProfile[]>([]);
-  const [areas, setAreas] = useState<string[]>([]);
-  const [requirement, setRequirement] = useState<any>(null);
-  const [savingReq, setSavingReq] = useState(false);
+    const featuredTutors = rawFeatured.map((doc: any) => ({
+      ...doc,
+      id: doc.id || String(doc._id),
+    })) as TeacherProfile[];
 
-  // Requirement form
-  const [reqStudentName, setReqStudentName] = useState("");
-  const [reqClass, setReqClass] = useState("Class 10");
-  const [reqSchool, setReqSchool] = useState("");
-  const [reqSubjects, setReqSubjects] = useState<string[]>(["Mathematics"]);
-  const [reqModes, setReqModes] = useState<string[]>(["home"]);
-  const [reqArea, setReqArea] = useState("");
-  const [reqTime, setReqTime] = useState("");
-  const [reqBudgetMin, setReqBudgetMin] = useState(2000);
-  const [reqBudgetMax, setReqBudgetMax] = useState(4000);
-  const [reqDesc, setReqDesc] = useState("");
+    return {
+      stats: {
+        verified_tutors: verifiedTutors,
+        total_tutors: totalTutors,
+        students,
+        requests,
+        areas: DIBRUGARH_AREAS.length,
+      },
+      featuredTutors,
+      areas: DIBRUGARH_AREAS,
+    };
+  } catch (e) {
+    console.error("Error loading home data:", e);
+    return {
+      stats: {
+        verified_tutors: 6,
+        total_tutors: 8,
+        students: 15,
+        requests: 12,
+        areas: DIBRUGARH_AREAS.length,
+      },
+      featuredTutors: [],
+      areas: DIBRUGARH_AREAS,
+    };
+  }
+}
 
-  const fetchRequests = useCallback(async () => {
-    try {
-      const res = await fetch("/api/requests/sent");
-      const data = await res.json();
-      if (Array.isArray(data)) setRequests(data);
-    } catch {}
-  }, []);
-
-  const fetchSaved = useCallback(async () => {
-    try {
-      const res = await fetch("/api/saved");
-      const data = await res.json();
-      if (Array.isArray(data)) setSavedTutors(data);
-    } catch {}
-  }, []);
-
-  const fetchRequirement = useCallback(async () => {
-    try {
-      const res = await fetch("/api/students/requirement");
-      const data = await res.json();
-      if (data && !data.error) {
-        setRequirement(data);
-        setReqStudentName(data.student_name || "");
-        setReqClass(data.class_std || "Class 10");
-        setReqSchool(data.school_name || "");
-        setReqSubjects(data.subjects || []);
-        setReqModes(data.preferred_modes || []);
-        setReqArea(data.preferred_area || "");
-        setReqTime(data.preferred_time || "");
-        setReqBudgetMin(data.budget_min || 2000);
-        setReqBudgetMax(data.budget_max || 4000);
-        setReqDesc(data.description || "");
-      }
-    } catch {}
-  }, []);
-
-  useEffect(() => {
-    fetch("/api/meta/areas")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setAreas(data);
-          if (data.length > 0) setReqArea(data[0]);
-        }
-      })
-      .catch(() => {});
-
-    fetchRequests();
-    fetchSaved();
-    fetchRequirement();
-  }, [fetchRequests, fetchSaved, fetchRequirement]);
-
-  const handleSaveRequirement = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSavingReq(true);
-    try {
-      const payload = {
-        student_name: reqStudentName || user?.fullName || "Student",
-        class_std: reqClass,
-        school_name: reqSchool || undefined,
-        subjects: reqSubjects,
-        preferred_modes: reqModes,
-        preferred_area: reqArea,
-        preferred_time: reqTime || undefined,
-        budget_min: Number(reqBudgetMin),
-        budget_max: Number(reqBudgetMax),
-        description: reqDesc || undefined,
-      };
-
-      const res = await fetch("/api/students/requirement", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-
-      setRequirement(data);
-      toast.success("Learning requirement saved successfully!");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to save requirement");
-    } finally {
-      setSavingReq(false);
-    }
-  };
-
-  const handleDeleteRequirement = async () => {
-    if (!window.confirm("Are you sure you want to remove your active requirement?")) return;
-    try {
-      const res = await fetch("/api/students/requirement", { method: "DELETE" });
-      if (res.ok) {
-        setRequirement(null);
-        toast.success("Requirement removed");
-      }
-    } catch {
-      toast.error("Failed to delete requirement");
-    }
-  };
-
-  const handleUnsaveTutor = async (tutor: TeacherProfile) => {
-    try {
-      const res = await fetch(`/api/saved/${tutor.id}`, { method: "DELETE" });
-      if (res.ok) {
-        setSavedTutors((prev) => prev.filter((t) => t.id !== tutor.id));
-        toast.success("Tutor removed from saved list");
-      }
-    } catch {
-      toast.error("Failed to update saved tutors");
-    }
-  };
-
-  const toggleSubject = (s: string) => {
-    setReqSubjects((prev) =>
-      prev.includes(s) ? prev.filter((item) => item !== s) : [...prev, s]
-    );
-  };
-
-  const toggleMode = (m: string) => {
-    setReqModes((prev) =>
-      prev.includes(m) ? prev.filter((item) => item !== m) : [...prev, m]
-    );
-  };
+export default async function HomePage() {
+  const { stats, featuredTutors, areas } = await getHomeData();
 
   return (
-    <div className="min-h-screen bg-[color:var(--bg)] py-10 px-5 lg:px-10 max-w-7xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <div>
-          <div className="label-eyebrow">STUDENT & PARENT PORTAL</div>
-          <h1 className="font-display font-black text-3xl text-[color:var(--ink)] mt-1">
-            Welcome, {user?.firstName || user?.fullName || "Student"}
-          </h1>
-          <p className="text-xs text-[color:var(--ink-soft)] mt-1">
-            Track inquiries, update tuition requirements, and manage saved tutors.
-          </p>
-        </div>
-
-        <Button
-          asChild
-          className="rounded-full bg-[color:var(--terracotta)] text-white hover:bg-[color:var(--terracotta-soft)]"
-        >
-          <Link href="/teachers">Find More Tutors</Link>
-        </Button>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-[color:var(--border-earth)] mb-8">
-        <button
-          onClick={() => setActiveTab("requests")}
-          className={`pb-3 px-4 text-xs font-semibold flex items-center gap-1.5 transition-all border-b-2 ${
-            activeTab === "requests"
-              ? "border-[color:var(--terracotta)] text-[color:var(--terracotta)]"
-              : "border-transparent text-[color:var(--ink-soft)] hover:text-[color:var(--ink)]"
-          }`}
-        >
-          <Send size={14} /> Sent Requests ({requests.length})
-        </button>
-        <button
-          onClick={() => setActiveTab("requirement")}
-          className={`pb-3 px-4 text-xs font-semibold flex items-center gap-1.5 transition-all border-b-2 ${
-            activeTab === "requirement"
-              ? "border-[color:var(--terracotta)] text-[color:var(--terracotta)]"
-              : "border-transparent text-[color:var(--ink-soft)] hover:text-[color:var(--ink)]"
-          }`}
-        >
-          <FileText size={14} /> My Requirement {requirement ? "✓" : ""}
-        </button>
-        <button
-          onClick={() => setActiveTab("saved")}
-          className={`pb-3 px-4 text-xs font-semibold flex items-center gap-1.5 transition-all border-b-2 ${
-            activeTab === "saved"
-              ? "border-[color:var(--terracotta)] text-[color:var(--terracotta)]"
-              : "border-transparent text-[color:var(--ink-soft)] hover:text-[color:var(--ink)]"
-          }`}
-        >
-          <Heart size={14} /> Saved Tutors ({savedTutors.length})
-        </button>
-      </div>
-
-      {/* Tab: Requests */}
-      {activeTab === "requests" && (
-        <div className="flex flex-col gap-4">
-          {requests.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-[color:var(--border-earth)] p-12 text-center">
-              <div className="font-display font-bold text-lg mb-1">
-                No Tuition Inquiries Sent Yet
-              </div>
-              <p className="text-xs text-[color:var(--ink-soft)] mb-4">
-                Explore our directory of verified Dibrugarh educators and request
-                private tuition.
-              </p>
-              <Button
-                asChild
-                className="rounded-full bg-[color:var(--terracotta)] text-white"
-              >
-                <Link href="/teachers">Browse Tutors</Link>
-              </Button>
+    <div className="min-h-screen bg-[color:var(--bg)]">
+      {/* Hero Section */}
+      <section className="relative pt-12 pb-20 px-5 lg:px-10 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div className="lg:col-span-7 flex flex-col gap-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[color:var(--surface)] border border-[color:var(--border-earth)] w-fit text-xs font-medium text-[color:var(--ink-soft)]">
+              Dedicated to Dibrugarh students & parents
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {requests.map((r) => (
-                <div
-                  key={r.id}
-                  className="bg-white p-5 rounded-2xl border border-[color:var(--border-earth)] shadow-sm flex flex-col justify-between gap-4"
-                >
-                  <div>
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h3 className="font-display font-bold text-base text-[color:var(--ink)]">
-                          {r.teacher_name}
-                        </h3>
-                        <div className="text-xs text-[color:var(--ink-soft)] mt-0.5">
-                          {r.subject} · {r.class_std} ({r.preferred_area})
-                        </div>
-                      </div>
-                      <span
-                        className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold flex items-center gap-1 ${
-                          r.status === "accepted"
-                            ? "bg-green-100 text-green-800"
-                            : r.status === "rejected"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-amber-100 text-amber-800"
-                        }`}
-                      >
-                        {r.status === "accepted" && <CheckCircle2 size={12} />}
-                        {r.status === "rejected" && <XCircle size={12} />}
-                        {r.status === "pending" && <Clock size={12} />}
-                        {r.status.toUpperCase()}
-                      </span>
-                    </div>
+            <h1 className="font-display font-black text-4xl sm:text-5xl lg:text-6xl tracking-tight leading-[1.1] text-[color:var(--ink)]">
+              Find verified home tutors in{" "}
+              <span className="text-[color:var(--terracotta)]">Dibrugarh</span>
+            </h1>
+            <p className="text-base sm:text-lg text-[color:var(--ink-soft)] leading-relaxed max-w-2xl">
+              Connect directly with qualified private tutors across
+              Chowkidingee, Amolapatty, Naliapool, Milan Nagar, and all local
+              areas for CBSE, SEBA, & College boards.
+            </p>
 
-                    {r.message && (
-                      <div className="text-xs bg-[color:var(--surface)] p-3 rounded-xl mt-3 text-[color:var(--ink-soft)]">
-                        &quot;{r.message}&quot;
-                      </div>
-                    )}
-                  </div>
-
-                  {r.status === "accepted" && (
-                    <div className="bg-green-50 border border-green-200 p-3 rounded-xl flex items-center justify-between text-xs text-green-900">
-                      <div>
-                        <span className="font-semibold block">
-                          Accepted! Teacher Contact:
-                        </span>
-                        <span className="flex items-center gap-1 mt-0.5">
-                          <Phone size={12} /> {r.teacher_phone || "Contact via App"}
-                        </span>
-                      </div>
-                      {r.teacher_phone && (
-                        <a
-                          href={`tel:${r.teacher_phone}`}
-                          className="px-3 py-1.5 bg-green-700 text-white rounded-full font-semibold hover:bg-green-800"
-                        >
-                          Call Teacher
-                        </a>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="text-[11px] text-neutral-400 text-right">
-                    Sent: {new Date(r.created_at).toLocaleDateString()}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Tab: Requirement */}
-      {activeTab === "requirement" && (
-        <div className="bg-white p-6 sm:p-10 rounded-3xl border border-[color:var(--border-earth)] shadow-sm max-w-3xl">
-          <div className="flex items-center justify-between mb-6 pb-4 border-b border-[color:var(--border-earth)]">
-            <div>
-              <h2 className="font-display font-bold text-xl text-[color:var(--ink)]">
-                Student Learning Profile & Needs
-              </h2>
-              <p className="text-xs text-[color:var(--ink-soft)] mt-0.5">
-                Keep your standard requirements saved for rapid tuition inquiries
-              </p>
-            </div>
-            {requirement && (
-              <button
-                onClick={handleDeleteRequirement}
-                className="text-xs text-red-600 hover:underline flex items-center gap-1"
-              >
-                <Trash2 size={13} /> Clear Profile
-              </button>
-            )}
-          </div>
-
-          <form onSubmit={handleSaveRequirement} className="flex flex-col gap-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-semibold block mb-1">
-                  Student Name *
-                </label>
+            {/* Search Box */}
+            <form
+              action="/teachers"
+              method="GET"
+              className="bg-white p-2.5 sm:p-3 rounded-2xl sm:rounded-full border border-[color:var(--border-earth)] shadow-sm flex flex-col sm:flex-row items-center gap-2 mt-2"
+            >
+              <div className="flex items-center gap-2 px-3 flex-1 w-full">
+                <Search
+                  size={18}
+                  className="text-[color:var(--ink-soft)] shrink-0"
+                />
                 <input
-                  required
+                  data-testid="hero-search-input"
                   type="text"
-                  placeholder="e.g. Rahul Sharma"
-                  value={reqStudentName}
-                  onChange={(e) => setReqStudentName(e.target.value)}
-                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-2.5 outline-none"
+                  name="q"
+                  placeholder="Subject, class or teacher name..."
+                  className="w-full bg-transparent border-none text-sm outline-none text-[color:var(--ink)] placeholder:text-neutral-400"
                 />
               </div>
-
-              <div>
-                <label className="text-xs font-semibold block mb-1">
-                  School / Institution
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Salt Brook Academy / Don Bosco"
-                  value={reqSchool}
-                  onChange={(e) => setReqSchool(e.target.value)}
-                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-2.5 outline-none"
+              <div className="flex items-center gap-2 px-3 py-1 sm:border-l border-[color:var(--border-earth)] w-full sm:w-auto">
+                <MapPin
+                  size={18}
+                  className="text-[color:var(--ink-soft)] shrink-0"
                 />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-semibold block mb-1">
-                  Class / Standard *
-                </label>
                 <select
-                  value={reqClass}
-                  onChange={(e) => setReqClass(e.target.value)}
-                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-2.5 outline-none"
+                  data-testid="hero-area-select"
+                  name="area"
+                  defaultValue=""
+                  className="bg-transparent text-sm outline-none text-[color:var(--ink)] w-full cursor-pointer"
                 >
-                  {CLASSES.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold block mb-1">
-                  Preferred Locality in Dibrugarh *
-                </label>
-                <select
-                  value={reqArea}
-                  onChange={(e) => setReqArea(e.target.value)}
-                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-2.5 outline-none"
-                >
+                  <option value="">All Dibrugarh Areas</option>
                   {areas.map((a) => (
                     <option key={a} value={a}>
                       {a}
@@ -395,151 +121,160 @@ export default function StudentDashboard() {
                   ))}
                 </select>
               </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold block mb-2">
-                Subjects Required *
-              </label>
-              <div className="flex flex-wrap gap-1.5">
-                {SUBJECTS.map((s) => {
-                  const selected = reqSubjects.includes(s);
-                  return (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => toggleSubject(s)}
-                      className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
-                        selected
-                          ? "bg-[color:var(--ink)] text-white border-[color:var(--ink)]"
-                          : "border-[color:var(--border-earth)] bg-[color:var(--surface)] text-[color:var(--ink-soft)]"
-                      }`}
-                    >
-                      {s}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold block mb-2">
-                Preferred Tuition Mode
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {MODES.map((m) => {
-                  const selected = reqModes.includes(m.value);
-                  return (
-                    <button
-                      key={m.value}
-                      type="button"
-                      onClick={() => toggleMode(m.value)}
-                      className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
-                        selected
-                          ? "bg-[color:var(--terracotta)] text-white border-[color:var(--terracotta)]"
-                          : "border-[color:var(--border-earth)] bg-[color:var(--surface)] text-[color:var(--ink-soft)]"
-                      }`}
-                    >
-                      {m.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="text-xs font-semibold block mb-1">
-                  Budget Min (₹/mo)
-                </label>
-                <input
-                  type="number"
-                  value={reqBudgetMin}
-                  onChange={(e) => setReqBudgetMin(Number(e.target.value))}
-                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-2.5 outline-none"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold block mb-1">
-                  Budget Max (₹/mo)
-                </label>
-                <input
-                  type="number"
-                  value={reqBudgetMax}
-                  onChange={(e) => setReqBudgetMax(Number(e.target.value))}
-                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-2.5 outline-none"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold block mb-1">
-                  Preferred Time
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. 5pm - 8pm"
-                  value={reqTime}
-                  onChange={(e) => setReqTime(e.target.value)}
-                  className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-2.5 outline-none"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold block mb-1">
-                Special Notes / Needs
-              </label>
-              <textarea
-                rows={3}
-                placeholder="Mention specific board exam syllabus, weak areas, or preference..."
-                value={reqDesc}
-                onChange={(e) => setReqDesc(e.target.value)}
-                className="w-full text-xs border border-[color:var(--border-earth)] rounded-xl p-2.5 outline-none"
-              />
-            </div>
-
-            <Button
-              type="submit"
-              disabled={savingReq}
-              className="rounded-full bg-[color:var(--terracotta)] hover:bg-[color:var(--terracotta-soft)] text-white self-start px-8 py-5"
-            >
-              {savingReq ? "Saving..." : "Save Learning Profile"}
-            </Button>
-          </form>
-        </div>
-      )}
-
-      {/* Tab: Saved Tutors */}
-      {activeTab === "saved" && (
-        <div>
-          {savedTutors.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-[color:var(--border-earth)] p-12 text-center">
-              <div className="font-display font-bold text-lg mb-1">
-                No Saved Tutors Yet
-              </div>
-              <p className="text-xs text-[color:var(--ink-soft)] mb-4">
-                Bookmark top tutors to compare rates and qualifications later.
-              </p>
               <Button
-                asChild
-                className="rounded-full bg-[color:var(--terracotta)] text-white"
+                type="submit"
+                data-testid="hero-search-btn"
+                className="rounded-full bg-[color:var(--terracotta)] hover:bg-[color:var(--terracotta-soft)] px-6 w-full sm:w-auto text-white"
               >
-                <Link href="/teachers">Browse Tutors</Link>
+                Search
               </Button>
+            </form>
+
+            {/* Stats row */}
+            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-[color:var(--border-earth)] mt-4">
+              <div>
+                <div className="font-display font-bold text-2xl text-[color:var(--ink)]">
+                  {stats?.verified_tutors ?? "6+"}
+                </div>
+                <div className="text-xs text-[color:var(--ink-soft)]">
+                  Verified Tutors
+                </div>
+              </div>
+              <div>
+                <div className="font-display font-bold text-2xl text-[color:var(--ink)]">
+                  {stats?.areas ?? "25+"}
+                </div>
+                <div className="text-xs text-[color:var(--ink-soft)]">
+                  Local Localities
+                </div>
+              </div>
+              <div>
+                <div className="font-display font-bold text-2xl text-[color:var(--ink)]">
+                  100%
+                </div>
+                <div className="text-xs text-[color:var(--ink-soft)]">
+                  Direct Connection
+                </div>
+              </div>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {savedTutors.map((tutor) => (
-                <TutorCard
-                  key={tutor.id}
-                  t={tutor}
-                  onSave={handleUnsaveTutor}
-                  saved={true}
-                />
-              ))}
+          </div>
+
+          <div className="lg:col-span-5 relative">
+            <div className="relative rounded-3xl overflow-hidden border border-[color:var(--border-earth)] shadow-xl bg-[color:var(--surface)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://images.unsplash.com/photo-1514369118554-e20d93546b30?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzB8MHwxfHNlYXJjaHwyfHxpbmRpYW4lMjBzdHVkZW50JTIwc3R1ZHlpbmd8ZW58MHx8fHwxNzg3OTc1Mzk4fDA&ixlib=rb-4.1.0&q=85"
+                alt="Student studying in Dibrugarh"
+                className="w-full h-80 sm:h-96 object-cover"
+              />
+              <div className="p-6 bg-white/90 backdrop-blur-md">
+                <div className="flex items-center gap-2 text-sm font-semibold text-[color:var(--ink)]">
+                  <ShieldCheck
+                    className="text-[color:var(--terracotta)]"
+                    size={18}
+                  />
+                  Safe & Transparent Tutor Matching
+                </div>
+                <p className="text-xs text-[color:var(--ink-soft)] mt-1">
+                  Contact details are securely revealed upon teacher
+                  confirmation to protect privacy and eliminate spam.
+                </p>
+              </div>
             </div>
-          )}
+          </div>
         </div>
-      )}
+      </section>
+
+      {/* Featured Tutors Section */}
+      <section className="py-16 bg-[color:var(--surface)] border-y border-[color:var(--border-earth)]">
+        <div className="max-w-7xl mx-auto px-5 lg:px-10">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-8">
+            <div>
+              <div className="label-eyebrow">HANDPICKED TEACHERS</div>
+              <h2 className="font-display font-black text-2xl sm:text-3xl mt-1 text-[color:var(--ink)]">
+                Top Rated Local Tutors
+              </h2>
+            </div>
+            <Link
+              href="/teachers"
+              className="text-sm font-semibold text-[color:var(--terracotta)] hover:underline flex items-center gap-1"
+            >
+              Browse all tutors <ArrowRight size={16} />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredTutors.map((tutor) => (
+              <TutorCard key={tutor.id} t={tutor} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why Tuitora */}
+      <section className="py-20 px-5 lg:px-10 max-w-7xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <div className="label-eyebrow">WHY CHOOSE TUITORA</div>
+          <h2 className="font-display font-black text-3xl sm:text-4xl mt-1 text-[color:var(--ink)]">
+            Built specifically for Dibrugarh
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="bg-white p-8 rounded-2xl border border-[color:var(--border-earth)] flex flex-col gap-3">
+            <div className="w-12 h-12 rounded-xl bg-[color:var(--surface)] grid place-items-center text-[color:var(--terracotta)]">
+              <MapPin size={24} />
+            </div>
+            <h3 className="font-display font-bold text-lg">
+              Hyper-Local Matching
+            </h3>
+            <p className="text-sm text-[color:var(--ink-soft)] leading-relaxed">
+              Target tutors within walking or short commuting distance across
+              all Dibrugarh pin codes and localities.
+            </p>
+          </div>
+
+          <div className="bg-white p-8 rounded-2xl border border-[color:var(--border-earth)] flex flex-col gap-3">
+            <div className="w-12 h-12 rounded-xl bg-[color:var(--surface)] grid place-items-center text-[color:var(--terracotta)]">
+              <CheckCircle2 size={24} />
+            </div>
+            <h3 className="font-display font-bold text-lg">
+              Admin Verified Credentials
+            </h3>
+            <p className="text-sm text-[color:var(--ink-soft)] leading-relaxed">
+              Teachers qualifications and experience are screened to ensure
+              quality academic mentorship.
+            </p>
+          </div>
+
+          <div className="bg-white p-8 rounded-2xl border border-[color:var(--border-earth)] flex flex-col gap-3">
+            <div className="w-12 h-12 rounded-xl bg-[color:var(--surface)] grid place-items-center text-[color:var(--terracotta)]">
+              <Users size={24} />
+            </div>
+            <h3 className="font-display font-bold text-lg">
+              Zero Middleman Commission
+            </h3>
+            <p className="text-sm text-[color:var(--ink-soft)] leading-relaxed">
+              Parents connect directly with educators. No hidden platform cuts
+              or exorbitant broker charges.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-[color:var(--border-earth)] bg-white py-12 px-5 lg:px-10 text-center text-xs text-[color:var(--ink-soft)]">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            © {new Date().getFullYear()} Tuitora Dibrugarh. All rights reserved.
+          </div>
+          <div className="flex gap-6">
+            <Link href="/sign-in" className="hover:underline">
+              Login
+            </Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

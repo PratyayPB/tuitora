@@ -3,7 +3,11 @@ import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default async function DashboardRedirect() {
+export default async function TeacherDashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const user = await getCurrentUser();
 
   if (!user) {
@@ -14,14 +18,10 @@ export default async function DashboardRedirect() {
     redirect("/onboarding/role");
   }
 
-  if (user.role === "admin") {
-    redirect("/dashboard/admin");
+  // Only teacher role can access teacher dashboard
+  if (user.role !== "teacher") {
+    redirect("/unauthorized");
   }
 
-  if (user.role === "teacher") {
-    redirect("/dashboard/teacher");
-  }
-
-  // Default to student
-  redirect("/dashboard/student/dashboard");
+  return <>{children}</>;
 }

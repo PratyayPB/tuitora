@@ -16,6 +16,12 @@ export async function POST() {
       user,
     });
   } catch (err: any) {
+    if (err?.digest?.startsWith("NEXT_REDIRECT")) {
+      return NextResponse.json({
+        success: true,
+        user: { is_blocked: true },
+      });
+    }
     return NextResponse.json(
       { error: err.message || "Failed to synchronize user" },
       { status: 500 }

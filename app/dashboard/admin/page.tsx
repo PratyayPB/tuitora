@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
-import { Flag, Trash2 } from "lucide-react";
+import { Flag, Trash2, Calendar, Filter } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminDashboard() {
@@ -13,7 +13,9 @@ export default function AdminDashboard() {
   const [teachers, setTeachers] = useState<any[]>([]);
   const [usersList, setUsersList] = useState<any[]>([]);
   const [reports, setReports] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<"teachers" | "users" | "reports">("teachers");
+  const [bookedTuitions, setBookedTuitions] = useState<any[]>([]);
+  const [timeFilter, setTimeFilter] = useState<string>("30");
+  const [activeTab, setActiveTab] = useState<"teachers" | "users" | "reports" | "bookedTuitions">("teachers");
   const [loading, setLoading] = useState(true);
 
   const fetchAdminData = useCallback(async () => {
@@ -37,9 +39,26 @@ export default function AdminDashboard() {
     }
   }, []);
 
+  const fetchBookedTuitions = useCallback(async (filterVal: string) => {
+    try {
+      const query = filterVal ? `?filter=${filterVal}` : "";
+      const res = await fetch(`/api/admin/booked-tuitions${query}`);
+      if (res.ok) {
+        const data = await res.json();
+        setBookedTuitions(data);
+      }
+    } catch {
+      toast.error("Failed to load booked tuitions");
+    }
+  }, []);
+
   useEffect(() => {
     fetchAdminData();
   }, [fetchAdminData]);
+
+  useEffect(() => {
+    fetchBookedTuitions(timeFilter);
+  }, [timeFilter, fetchBookedTuitions]);
 
   const handleVerifyTeacher = async (teacherId: string, verified: boolean) => {
     try {
@@ -99,7 +118,7 @@ export default function AdminDashboard() {
           Platform Management
         </h1>
         <p className="text-xs text-[color:var(--ink-soft)] mt-1">
-          Verify local tutors, manage user status, and handle student reports.
+          Verify local tutors, manage user status, review student reports, and track booked tuitions.
         </p>
       </div>
 
@@ -155,10 +174,10 @@ export default function AdminDashboard() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-[color:var(--border-earth)] mb-8">
+      <div className="flex items-center gap-2 border-b border-[color:var(--border-earth)] mb-8 overflow-x-auto">
         <button
           onClick={() => setActiveTab("teachers")}
-          className={`pb-3 px-4 text-xs font-semibold transition-all border-b-2 ${
+          className={`pb-3 px-4 text-xs font-semibold whitespace-nowrap transition-all border-b-2 ${
             activeTab === "teachers"
               ? "border-[color:var(--terracotta)] text-[color:var(--terracotta)]"
               : "border-transparent text-[color:var(--ink-soft)] hover:text-[color:var(--ink)]"
@@ -167,8 +186,18 @@ export default function AdminDashboard() {
           Teacher Profiles ({teachers.length})
         </button>
         <button
+          onClick={() => setActiveTab("bookedTuitions")}
+          className={`pb-3 px-4 text-xs font-semibold whitespace-nowrap transition-all border-b-2 ${
+            activeTab === "bookedTuitions"
+              ? "border-[color:var(--terracotta)] text-[color:var(--terracotta)]"
+              : "border-transparent text-[color:var(--ink-soft)] hover:text-[color:var(--ink)]"
+          }`}
+        >
+          Booked Tutions ({bookedTuitions.length})
+        </button>
+        <button
           onClick={() => setActiveTab("users")}
-          className={`pb-3 px-4 text-xs font-semibold transition-all border-b-2 ${
+          className={`pb-3 px-4 text-xs font-semibold whitespace-nowrap transition-all border-b-2 ${
             activeTab === "users"
               ? "border-[color:var(--terracotta)] text-[color:var(--terracotta)]"
               : "border-transparent text-[color:var(--ink-soft)] hover:text-[color:var(--ink)]"
@@ -178,7 +207,7 @@ export default function AdminDashboard() {
         </button>
         <button
           onClick={() => setActiveTab("reports")}
-          className={`pb-3 px-4 text-xs font-semibold transition-all border-b-2 ${
+          className={`pb-3 px-4 text-xs font-semibold whitespace-nowrap transition-all border-b-2 ${
             activeTab === "reports"
               ? "border-[color:var(--terracotta)] text-[color:var(--terracotta)]"
               : "border-transparent text-[color:var(--ink-soft)] hover:text-[color:var(--ink)]"
@@ -258,6 +287,100 @@ export default function AdminDashboard() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {activeTab === "bookedTuitions" && (
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-[color:var(--border-earth)]">
+            <div className="flex items-center gap-2 text-xs font-semibold text-[color:var(--ink)]">
+              <Filter size={14} className="text-[color:var(--terracotta)]" />
+              <span>Filter by Response Date:</span>
+            </div>
+            <div className="flex items-center gap-2">
+              {[
+                { label: "Last 1 Day", value: "1" },
+                { label: "Last 1 Week", value: "7" },
+                { label: "Last 30 Days", value: "30" },
+                { label: "All Time", value: "" },
+              ].map((f) => (
+                <button
+                  key={f.value}
+                  onClick={() => setTimeFilter(f.value)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                    timeFilter === f.value
+                      ? "bg-[color:var(--terracotta)] text-white shadow-sm"
+                      : "bg-[color:var(--surface)] text-[color:var(--ink-soft)] hover:text-[color:var(--ink)] border border-[color:var(--border-earth)]"
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-[color:var(--border-earth)] overflow-x-auto shadow-sm">
+            <table className="w-full text-xs text-left">
+              <thead className="bg-[color:var(--surface)] border-b border-[color:var(--border-earth)] text-[color:var(--ink-soft)] uppercase font-semibold">
+                <tr>
+                  <th className="p-4">Student Name</th>
+                  <th className="p-4">Teacher Name</th>
+                  <th className="p-4">Subject & Class</th>
+                  <th className="p-4">Preferred Location</th>
+                  <th className="p-4">Preferred Time</th>
+                  <th className="p-4">Budget</th>
+                  <th className="p-4">Accepted Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[color:var(--border-earth)]">
+                {bookedTuitions.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="p-8 text-center text-xs text-[color:var(--ink-soft)]">
+                      No booked tuitions found for the selected timeframe.
+                    </td>
+                  </tr>
+                ) : (
+                  bookedTuitions.map((b) => (
+                    <tr key={b.id} className="hover:bg-neutral-50/50">
+                      <td className="p-4 font-semibold text-[color:var(--ink)]">
+                        <div>{b.student_name}</div>
+                        {b.student_phone && (
+                          <div className="text-[11px] text-[color:var(--ink-soft)] font-normal">
+                            {b.student_phone}
+                          </div>
+                        )}
+                      </td>
+                      <td className="p-4 font-medium text-[color:var(--ink)]">
+                        {b.teacher_name}
+                      </td>
+                      <td className="p-4">
+                        <div className="font-medium text-[color:var(--ink)]">{b.subject}</div>
+                        <div className="text-[11px] text-[color:var(--ink-soft)]">{b.class_std}</div>
+                      </td>
+                      <td className="p-4 text-[color:var(--ink-soft)]">
+                        {b.preferred_area || b.preferred_location || "—"}
+                      </td>
+                      <td className="p-4 text-[color:var(--ink-soft)]">
+                        {b.preferred_time || "—"}
+                      </td>
+                      <td className="p-4 font-semibold text-[color:var(--ink)]">
+                        {b.budget ? `₹${b.budget}/mo` : "—"}
+                      </td>
+                      <td className="p-4 text-[color:var(--ink-soft)] whitespace-nowrap">
+                        {b.responded_at
+                          ? new Date(b.responded_at).toLocaleDateString("en-IN", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })
+                          : "—"}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

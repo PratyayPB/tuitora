@@ -32,6 +32,11 @@ export default async function AuthCallbackPage() {
     }
   }
 
+  // Check if account has been blocked by admin
+  if (user?.is_blocked) {
+    redirect("/blocked");
+  }
+
   // If user doesn't exist in DB or hasn't selected a role, direct to onboarding
   if (!user || !user.role) {
     redirect("/onboarding/role");
@@ -39,7 +44,7 @@ export default async function AuthCallbackPage() {
 
   // Check role in DB and redirect accordingly
   if (user.role === "teacher") {
-    redirect("/dashboard/tutor");
+    redirect("/dashboard/teacher");
   }
 
   if (user.role === "admin") {
@@ -47,7 +52,7 @@ export default async function AuthCallbackPage() {
   }
 
   if (user.role === "student") {
-    redirect("/");
+    redirect("/dashboard/student");
   }
 
   // Fallback for any unknown role

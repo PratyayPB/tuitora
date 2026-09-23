@@ -1,69 +1,9 @@
 import React from "react";
 import Link from "next/link";
-import { getDb } from "@/lib/mongodb";
-import { DIBRUGARH_AREAS } from "@/lib/constants";
-import TutorCard, { TeacherProfile } from "@/components/TutorCard";
-import {
-  Search,
-  MapPin,
-  ShieldCheck,
-  Users,
-  ArrowRight,
-  CheckCircle2,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
 
-async function getHomeData() {
-  try {
-    const db = await getDb();
-    const [verifiedTutors, totalTutors, students, requests, rawFeatured] =
-      await Promise.all([
-        db.collection("teacher_profiles").countDocuments({ is_verified: true }),
-        db.collection("teacher_profiles").countDocuments({}),
-        db.collection("users").countDocuments({ role: "student" }),
-        db.collection("tuition_requests").countDocuments({}),
-        db
-          .collection("teacher_profiles")
-          .find({}, { projection: { _id: 0, phone: 0, email: 0 } })
-          .limit(6)
-          .toArray(),
-      ]);
-
-    const featuredTutors = rawFeatured.map((doc: any) => ({
-      ...doc,
-      id: doc.id || String(doc._id),
-    })) as TeacherProfile[];
-
-    return {
-      stats: {
-        verified_tutors: verifiedTutors,
-        total_tutors: totalTutors,
-        students,
-        requests,
-        areas: DIBRUGARH_AREAS.length,
-      },
-      featuredTutors,
-      areas: DIBRUGARH_AREAS,
-    };
-  } catch (e) {
-    console.error("Error loading home data:", e);
-    return {
-      stats: {
-        verified_tutors: 6,
-        total_tutors: 8,
-        students: 15,
-        requests: 12,
-        areas: DIBRUGARH_AREAS.length,
-      },
-      featuredTutors: [],
-      areas: DIBRUGARH_AREAS,
-    };
-  }
-}
+import { MapPin, ShieldCheck, Users, CheckCircle2 } from "lucide-react";
 
 export default async function HomePage() {
-  const { stats, featuredTutors, areas } = await getHomeData();
-
   return (
     <div className="min-h-screen bg-[color:var(--bg)]">
       {/* Hero Section */}
@@ -71,7 +11,6 @@ export default async function HomePage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-7 flex flex-col gap-6">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[color:var(--surface)] border border-[color:var(--border-earth)] w-fit text-xs font-medium text-[color:var(--ink-soft)]">
-              <span className="w-2 h-2 rounded-full bg-[color:var(--terracotta)]"></span>
               Dedicated to Dibrugarh students & parents
             </div>
             <h1 className="font-display font-black text-4xl sm:text-5xl lg:text-6xl tracking-tight leading-[1.1] text-[color:var(--ink)]">
@@ -79,63 +18,16 @@ export default async function HomePage() {
               <span className="text-[color:var(--terracotta)]">Dibrugarh</span>
             </h1>
             <p className="text-base sm:text-lg text-[color:var(--ink-soft)] leading-relaxed max-w-2xl">
-              Connect directly with qualified private tutors across Chowkidingee,
-              Amolapatty, Naliapool, Milan Nagar, and all local areas for CBSE,
-              SEBA, & College boards.
+              Connect directly with qualified private tutors across
+              Chowkidingee, Amolapatty, Naliapool, Milan Nagar, and all local
+              areas for CBSE, SEBA, & College boards.
             </p>
-
-            {/* Search Box */}
-            <form
-              action="/teachers"
-              method="GET"
-              className="bg-white p-2.5 sm:p-3 rounded-2xl sm:rounded-full border border-[color:var(--border-earth)] shadow-sm flex flex-col sm:flex-row items-center gap-2 mt-2"
-            >
-              <div className="flex items-center gap-2 px-3 flex-1 w-full">
-                <Search
-                  size={18}
-                  className="text-[color:var(--ink-soft)] shrink-0"
-                />
-                <input
-                  data-testid="hero-search-input"
-                  type="text"
-                  name="q"
-                  placeholder="Subject, class or teacher name..."
-                  className="w-full bg-transparent border-none text-sm outline-none text-[color:var(--ink)] placeholder:text-neutral-400"
-                />
-              </div>
-              <div className="flex items-center gap-2 px-3 py-1 sm:border-l border-[color:var(--border-earth)] w-full sm:w-auto">
-                <MapPin
-                  size={18}
-                  className="text-[color:var(--ink-soft)] shrink-0"
-                />
-                <select
-                  data-testid="hero-area-select"
-                  name="area"
-                  defaultValue=""
-                  className="bg-transparent text-sm outline-none text-[color:var(--ink)] w-full cursor-pointer"
-                >
-                  <option value="">All Dibrugarh Areas</option>
-                  {areas.map((a) => (
-                    <option key={a} value={a}>
-                      {a}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <Button
-                type="submit"
-                data-testid="hero-search-btn"
-                className="rounded-full bg-[color:var(--terracotta)] hover:bg-[color:var(--terracotta-soft)] px-6 w-full sm:w-auto text-white"
-              >
-                Search
-              </Button>
-            </form>
 
             {/* Stats row */}
             <div className="grid grid-cols-3 gap-4 pt-6 border-t border-[color:var(--border-earth)] mt-4">
               <div>
                 <div className="font-display font-bold text-2xl text-[color:var(--ink)]">
-                  {stats?.verified_tutors ?? "6+"}
+                  {"6+"}
                 </div>
                 <div className="text-xs text-[color:var(--ink-soft)]">
                   Verified Tutors
@@ -143,7 +35,7 @@ export default async function HomePage() {
               </div>
               <div>
                 <div className="font-display font-bold text-2xl text-[color:var(--ink)]">
-                  {stats?.areas ?? "25+"}
+                  {"25+"}
                 </div>
                 <div className="text-xs text-[color:var(--ink-soft)]">
                   Local Localities
@@ -177,37 +69,11 @@ export default async function HomePage() {
                   Safe & Transparent Tutor Matching
                 </div>
                 <p className="text-xs text-[color:var(--ink-soft)] mt-1">
-                  Contact details are securely revealed upon teacher confirmation
-                  to protect privacy and eliminate spam.
+                  Contact details are securely revealed upon teacher
+                  confirmation to protect privacy and eliminate spam.
                 </p>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Tutors Section */}
-      <section className="py-16 bg-[color:var(--surface)] border-y border-[color:var(--border-earth)]">
-        <div className="max-w-7xl mx-auto px-5 lg:px-10">
-          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-8">
-            <div>
-              <div className="label-eyebrow">HANDPICKED TEACHERS</div>
-              <h2 className="font-display font-black text-2xl sm:text-3xl mt-1 text-[color:var(--ink)]">
-                Top Rated Local Tutors
-              </h2>
-            </div>
-            <Link
-              href="/teachers"
-              className="text-sm font-semibold text-[color:var(--terracotta)] hover:underline flex items-center gap-1"
-            >
-              Browse all tutors <ArrowRight size={16} />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredTutors.map((tutor) => (
-              <TutorCard key={tutor.id} t={tutor} />
-            ))}
           </div>
         </div>
       </section>
@@ -230,8 +96,8 @@ export default async function HomePage() {
               Hyper-Local Matching
             </h3>
             <p className="text-sm text-[color:var(--ink-soft)] leading-relaxed">
-              Target tutors within walking or short commuting distance across all
-              Dibrugarh pin codes and localities.
+              Target tutors within walking or short commuting distance across
+              all Dibrugarh pin codes and localities.
             </p>
           </div>
 
@@ -256,8 +122,8 @@ export default async function HomePage() {
               Zero Middleman Commission
             </h3>
             <p className="text-sm text-[color:var(--ink-soft)] leading-relaxed">
-              Parents connect directly with educators. No hidden platform cuts or
-              exorbitant broker charges.
+              Parents connect directly with educators. No hidden platform cuts
+              or exorbitant broker charges.
             </p>
           </div>
         </div>

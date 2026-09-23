@@ -87,9 +87,54 @@ export async function POST(req: Request) {
   if (eventType === "user.deleted") {
     const { id } = evt.data;
     if (id) {
-      await db.collection("users").deleteOne({ $or: [{ clerk_id: id }, { id }] });
-      await db.collection("teacher_profiles").deleteOne({ user_id: id });
-      await db.collection("student_requirements").deleteMany({ user_id: id });
+      // Find the user document first to get any associated internal IDs or clerk IDs
+      const userDoc = await db.collection("users").findOne({
+        $or: [{ clerk_id: id }, { id }],
+      });
+
+      const userIds: string[] = [id];
+      if (userDoc?.id && !userIds.includes(userDoc.id)) {
+        userIds.push(userDoc.id);
+      }
+      if (userDoc?.clerk_id && !userIds.includes(userDoc.clerk_id)) {
+        userIds.push(userDoc.clerk_id);
+      }
+
+      // 1. Delete user from users collection
+      await db.collection("users").deleteMany({
+        $or: [{ clerk_id: { $in: userIds } }, { id: { $in: userIds } }],
+      });
+
+      // 2. Delete teacher profiles
+      await db.collection("teacher_profiles").deleteMany({
+        $or: [{ user_id: { $in: userIds } }, { id: { $in: userIds } }],
+      });
+
+      // 3. Delete student learning requirements
+      await db.collection("student_requirements").deleteMany({
+        user_id: { $in: userIds },
+      });
+
+      // 4. Delete tuition requests where user was the student or the teacher
+      await db.collection("tuition_requests").deleteMany({
+        $or: [
+          { student_user_id: { $in: userIds } },
+          { teacher_user_id: { $in: userIds } },
+        ],
+      });
+
+      // 5. Delete saved tutors bookmarks
+      await db.collection("saved_tutors").deleteMany({
+        user_id: { $in: userIds },
+      });
+
+      // 6. Delete user reports
+      await db.collection("reports").deleteMany({
+        $or: [
+          { reporter_user_id: { $in: userIds } },
+          { target_user_id: { $in: userIds } },
+        ],
+      });
     }
   }
 

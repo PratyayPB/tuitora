@@ -25,6 +25,12 @@ export default function AuthSync() {
         fetch("/api/auth/sync", { method: "POST" })
           .then((res) => res.json())
           .then((data) => {
+            if (data.user?.is_blocked) {
+              if (typeof window !== "undefined" && window.location.pathname !== "/blocked") {
+                window.location.href = "/blocked";
+              }
+              return;
+            }
             if (data.success && typeof window !== "undefined") {
               sessionStorage.setItem("tuitora_synced_user", user.id);
             }
